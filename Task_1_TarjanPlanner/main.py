@@ -49,7 +49,7 @@ def run_optimizer():
                 f"Total Distance: {distance:.2f} km\n"
             )
             display_route_table(graph, route)
-            visualize_graph(graph, path=route)
+            visualize_graph(graph, path=route, relatives=relatives_dict)
 
         elif mode == "2":
             # Visit all relatives from the generated start point
@@ -63,7 +63,7 @@ def run_optimizer():
                 f"Total {criterion.capitalize()}: {metric:.2f}\n"
             )
             display_route_table(graph, path)
-            visualize_graph(graph, path=path)
+            visualize_graph(graph, path=path, relatives=relatives_dict)
 
         else:
             messagebox.showerror("Error", "Please select a valid mode.")
@@ -75,7 +75,7 @@ def run_optimizer():
 # Create the main window
 window = tk.Tk()
 window.title("TarjanPlanner")
-window.geometry("600x400")
+window.geometry("600x500")
 
 # Optimization Criteria
 tk.Label(window, text="Optimization Criterion:").pack(pady=5)
@@ -108,6 +108,19 @@ scrollbar.pack(side="right", fill="y")
 result_display = tk.Text(result_display_frame, wrap="word", yscrollcommand=scrollbar.set, height=10, width=60)
 result_display.pack(side="left", fill="both", expand=True)
 scrollbar.config(command=result_display.yview)
+
+# Load relatives data for accurate graph visualization
+relatives = load_data("data/relatives.csv")
+random_start = generate_random_start(relatives, max_distance=5)
+relatives.append(random_start)  # Add Random_Start to relatives list
+relatives_dict = {relative["name"]: relative["coords"] for relative in relatives}
+
+# Build the graph (default criterion for initial visualization)
+transport_modes = load_transport_modes("data/transport_modes.json")
+graph = build_graph(relatives, transport_modes, criterion="time")
+
+# Visualize the graph (initial visualization)
+visualize_graph(graph, path=None, relatives=relatives_dict)
 
 # Start the GUI loop
 window.mainloop()

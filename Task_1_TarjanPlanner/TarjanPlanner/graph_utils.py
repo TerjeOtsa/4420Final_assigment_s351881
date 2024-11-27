@@ -13,7 +13,6 @@ def generate_random_start(relatives, max_distance=5):
     anchor = random.choice(relatives)
     lat, lon = anchor["coords"]
 
-    # Generate random offsets within the specified distance
     while True:
         delta_lat = random.uniform(-0.05, 0.05)  # Approx. 5 km latitude range
         delta_lon = random.uniform(-0.05, 0.05)  # Approx. 5 km longitude range
@@ -23,6 +22,7 @@ def generate_random_start(relatives, max_distance=5):
         for relative in relatives:
             if geodesic(random_point, relative["coords"]).km <= max_distance:
                 return {"name": "Random_Start", "coords": random_point}
+
 
 
 def calculate_distance(coord1, coord2):
@@ -38,6 +38,39 @@ def calculate_distance(coord1, coord2):
     """Calculate geodesic distance between two coordinates."""
     return geodesic(coord1, coord2).km
 
+from geopy.distance import geodesic
+
+def calculate_cartesian_positions(relatives, reference_point):
+    """Convert geographic coordinates to Cartesian distances."""
+    positions = {}
+    for name, coords in relatives.items():
+        x_distance = geodesic((reference_point[0], coords[1]), reference_point).km
+        y_distance = geodesic((coords[0], reference_point[1]), reference_point).km
+
+        # Adjust for direction (negative for left/down)
+        x_distance *= -1 if coords[1] < reference_point[1] else 1
+        y_distance *= -1 if coords[0] < reference_point[0] else 1
+        positions[name] = (x_distance, y_distance)
+    return positions
+
+
+
+def normalize_positions(positions):
+    """Normalize positions for visualization scaling."""
+    x_values = [pos[0] for pos in positions.values()]
+    y_values = [pos[1] for pos in positions.values()]
+    min_x, max_x = min(x_values), max(x_values)
+    min_y, max_y = min(y_values), max(y_values)
+
+    normalized_positions = {
+        name: (
+            (pos[0] - min_x) / (max_x - min_x), 
+            (pos[1] - min_y) / (max_y - min_y)
+        )
+        for name, pos in positions.items()
+    }
+    return normalized_positions
+
 
 def build_graph(relatives, transport_modes, criterion="time"):
     """Build a graph from relatives and transport modes, optimizing for time, cost, or distance."""
@@ -45,12 +78,13 @@ def build_graph(relatives, transport_modes, criterion="time"):
 
     # Add random start point
     random_start = generate_random_start(relatives)
-    relatives.append(random_start)
+    relatives_dict = {relative["name"]: relative["coords"] for relative in relatives}
+    relatives_dict["Random_Start"] = random_start["coords"]
 
-    for i, relative1 in enumerate(relatives):
-        for j, relative2 in enumerate(relatives):
-            if i != j:
-                distance = calculate_distance(relative1["coords"], relative2["coords"])
+    for name1, coords1 in relatives_dict.items():
+        for name2, coords2 in relatives_dict.items():
+            if name1 != name2:
+                distance = calculate_distance(coords1, coords2)
 
                 # Choose mode based on distance range
                 if distance <= 0.5:
@@ -62,27 +96,21 @@ def build_graph(relatives, transport_modes, criterion="time"):
                 else:
                     preferred_mode = "Train"
 
-                # Find the transport mode details
                 mode = next((m for m in transport_modes if m["mode"] == preferred_mode), None)
                 if not mode:
-                    continue  # Skip if no matching transport mode
+                    continue
 
-                # Calculate time and cost
                 transfer_time = mode["transfer_time_min"] / 60
                 time = distance / mode["speed_kmh"] + transfer_time
                 cost = distance * mode["cost_per_km"]
 
-                # Add edge to the graph
                 graph.add_edge(
-                    relative1["name"],
-                    relative2["name"],
+                    name1, name2,
                     weight={"time": time, "cost": cost, "distance": distance}[criterion],
-                    time=time,
-                    cost=cost,
-                    distance=distance,
-                    mode=mode["mode"],
+                    time=time, cost=cost, distance=distance, mode=mode["mode"]
                 )
     return graph
+
 
 
 
@@ -115,12 +143,22 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-def visualize_graph(graph, path=None):
-    """Visualize the graph using Matplotlib with a grid and highlighted paths."""
-    if path and not isinstance(path, (list, tuple)):
-        raise ValueError("Path must be a list or tuple of node identifiers.")
+def visualize_graph(graph, path=None, relatives=None):
+    """Visualize the graph using Matplotlib with accurate relative positions."""
+    if not relatives:
+        raise ValueError("Relatives dictionary with coordinates is required for accurate positions.")
 
-    pos = nx.spring_layout(graph, seed=42)  # Fixed seed for consistent layout
+    # Generate positions using latitude and longitude for all nodes
+    pos = {node: (relatives[node][1], relatives[node][0]) for node in graph.nodes if node in relatives}
+
+    # Add position for the Random_Start node if it exists
+    if 'Random_Start' in graph.nodes and 'Random_Start' not in pos:
+        random_start_coords = relatives.get('Random_Start')
+        if random_start_coords:
+            pos['Random_Start'] = (random_start_coords[1], random_start_coords[0])
+        else:
+            raise ValueError("Random_Start does not have valid coordinates in the relatives dictionary.")
+
     plt.figure(figsize=(12, 8))
 
     # Draw nodes and edges
@@ -163,8 +201,8 @@ def visualize_graph(graph, path=None):
     # Add grid and explanations
     plt.grid(visible=True, which="both", color="lightgray", linestyle="--", alpha=0.7)
     plt.title("TarjanPlanner Graph Visualization", fontsize=16, fontweight="bold")
-    plt.xlabel("X-axis (relative positioning)", fontsize=12)
-    plt.ylabel("Y-axis (relative positioning)", fontsize=12)
+    plt.xlabel("Longitude", fontsize=12)
+    plt.ylabel("Latitude", fontsize=12)
 
     # Add legend
     legend_elements = [
@@ -180,10 +218,6 @@ def visualize_graph(graph, path=None):
     plt.legend(handles=legend_elements, loc="upper left", fontsize=10)
 
     plt.show()
-
-
-
-
 
 
 
