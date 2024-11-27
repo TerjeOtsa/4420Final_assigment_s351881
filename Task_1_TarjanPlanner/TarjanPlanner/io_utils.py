@@ -1,5 +1,6 @@
 import csv
-
+import random
+from geopy.distance import geodesic
 def load_data(filepath):
     """Load relatives' data from a CSV file."""
     relatives = []
@@ -48,4 +49,19 @@ def get_user_input(relatives):
         raise ValueError("Invalid criterion. Choose 'time' or 'cost'.")
     return start, end, criterion
 
+def generate_random_start(relatives, max_distance=5):
+    """Generate a random starting location within a given distance from at least one relative."""
+    # Select a random relative as the anchor point
+    anchor = random.choice(relatives)
+    lat, lon = anchor["coords"]
 
+    # Generate random offsets within the specified distance
+    while True:
+        delta_lat = random.uniform(-0.05, 0.05)  # Approx. 5 km latitude range
+        delta_lon = random.uniform(-0.05, 0.05)  # Approx. 5 km longitude range
+        random_point = (lat + delta_lat, lon + delta_lon)
+
+        # Check if the random point is within the max_distance of at least one relative
+        for relative in relatives:
+            if geodesic(random_point, relative["coords"]).km <= max_distance:
+                return {"name": "Random_Start", "coords": random_point}

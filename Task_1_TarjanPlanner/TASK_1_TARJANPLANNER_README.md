@@ -1,122 +1,146 @@
-# **TarjanPlanner**
+TarjanPlanner - README
+Overview
+TarjanPlanner is a Python-based route optimization tool that calculates the most efficient path for visiting multiple locations. Designed for flexibility and usability, the tool allows users to optimize routes based on:
 
-## **Overview**
-TarjanPlanner is a Python-based program designed to compute the most efficient way to visit relatives in a city using various modes of transport. The program utilizes **Dijkstra's algorithm** to determine optimal routes based on time, cost, or distance, incorporating a heuristic that prioritizes different transportation modes for specific distance ranges. The starting location is randomly generated within a 5 km radius of at least one relative.
 
----
+Time
+Cost
+Distance
+The application uses Dijkstra's Algorithm for route planning and dynamically adjusts transportation modes based on distance ranges:
 
-## **Features**
-- **Dynamic Graph Construction**: Build a graph with nodes and edges representing relatives and their connectivity.
-- **Mode Heuristics**:
-  - Walking: 0–0.5 km
-  - Biking: 0.5–2 km
-  - Bus: 2–5 km
-  - Train: >5 km
-- **Optimization Criteria**:
-  - Time
-  - Cost
-  - Distance
-- **Visualization**: Display the graph and highlight optimal paths.
-- **Testing**: Use `pytest` for validating core functionalities.
 
----
+Walking: 0–0.5 km
+Biking: 0.5–2 km
+Bus: 2–5 km
+Train: > 5 km
+The program also includes a graphical user interface (GUI) built with Tkinter for ease of interaction, route visualization with Matplotlib, and a detailed summary table with metrics.
 
-## **Folder Structure**
 
-```plaintext
-Task_1_TarjanPlanner/
-├── main.py                # Entry point of the program
-├── requirements.txt       # Dependencies for the project
-├── setup.py               # Package setup for installation
-├── data/                  # Data folder containing relatives and transport modes
-│   ├── relatives.csv
-│   └── transport_modes.json
-├── TarjanPlanner/         # Core application logic
-│   ├── __init__.py
-│   ├── io_utils.py
-│   ├── graph_utils.py
-│   ├── transport_utils.py
-        input_vaildation.py
-        error_handler.py
-├── tests/                 # Testing folder
-│   ├── test_io_utils.py
-│   ├── test_graph_utils.py
-│   ├── test_transport_modes.py
-
-## **Setup Instructions**
-
-### **1. Clone the Repository**
-```bash
-git clone https://github.com/your-repo-url/Task_1_TarjanPlanner.git
-cd Task_1_TarjanPlanner
-2. Install Dependencies
-Use pip to install required packages:
-
-bash
-Copy code
-pip install -r requirements.txt
-3. Verify Installation
-Ensure pytest and all dependencies are installed:
-
-bash
-Copy code
-pytest --version
-Usage
-Running the Program
-To execute the program:
-
-bash
-Copy code
-python main.py
-Program Flow
-Choose Optimization Criterion:
-time
-cost
-distance
-Select Mode:
-1: Visit one relative.
-2: Visit all relatives.
-Random Starting Location:
-A random location is generated within a 5 km radius of one relative.
-Optimal Path Calculation:
-The program calculates and displays the optimal path, cost, time, and distance.
+Features
+Dynamic Start Location:
+Generates a random starting point within 5 km of a relative.
+Optimization Criteria:
+Optimize for time, cost, or distance.
+Modes:
+Visit One Relative: Calculate the best route to a specific relative.
+Visit All Relatives: Plan the shortest route to visit all relatives starting from the random point.
 Graph Visualization:
-A graphical representation of the route is shown.
+Displays the graph with the calculated route highlighted.
+
+Summary Table:
+Displays step-by-step distances, times, and costs with transport modes in a formatted table.
+Performance Logging:
+Logs the time taken for route calculations.
+Project Structure
+
+
+
+Task_1_TarjanPlanner/
+│
+├── main.py                  # Main entry point for the program
+├── requirements.txt         # Python dependencies
+├── setup.py                 # Optional setup for installation
+│
+├── TarjanPlanner/           # Core application modules
+│   ├── __init__.py
+│   ├── io_utils.py          # Handles file I/O and data loading
+│   ├── graph_utils.py       # Graph creation and route optimization logic
+│   ├── transport_utils.py   # Transport modes and related utilities
+│   ├── display_utils.py     # Utilities for displaying route details
+│
+├── data/                    # Data folder
+│   ├── relatives.csv        # Relatives data (names, coordinates)
+│   ├── transport_modes.json # Transport modes with speed, cost, and transfer times
+│
+└── tests/                   # Test folder
+    ├── test_io_utils.py     # Unit tests for io_utils
+    ├── test_graph_utils.py  # Unit tests for graph_utils
+    ├── test_transport_utils.py # Unit tests for transport_utils
+
+Setup Instructions
+1. Clone the Repository
+
+git clone https://github.com/TerjeOtsa/4420Final_assigment_s351881
+
+cd Task_1_TarjanPlanner
+
+2. Install Dependencies
+Use pip to install the required dependencies:
+
+
+pip install -r requirements.txt
+
+3. Verify Installation
+Ensure all dependencies are installed:
+
+
+python --version
+pip list
+
+How to Run
+
+1. Run the Application
+Start the application by running:
+
+python main.py
+
+
+2. GUI Workflow
+Select Optimization Criterion:
+Choose from Time, Cost, or Distance.
+
+Select Mode:
+
+Visit One Relative:
+Enter the name or number of the relative you want to visit.
+
+Visit All Relatives:
+Calculates the shortest path to visit all relatives from the random start.
+
+
+Result:
+The GUI displays the results, including:
+Optimal route
+
+Metrics: time, cost, and distance
+A graphical visualization of the path.
+A detailed table of step-by-step metrics is printed in the terminal.
+
+
 Testing
-Running Tests
+Run Unit Tests
 To validate the core functionality:
 
-bash
-Copy code
+
 pytest tests/
 Test Descriptions
 test_io_utils.py:
-Tests data loading from relatives.csv and transport_modes.json.
-Validates random starting point generation.
+Validates file loading for relatives.csv and transport_modes.json.
+Tests random start location generation.
 test_graph_utils.py:
-Tests graph construction for correct nodes and edges.
+Ensures the graph has correct nodes and edges.
 Validates Dijkstra's algorithm for pathfinding.
-test_transport_modes.py:
+test_transport_utils.py:
 Ensures proper mode selection based on distance ranges.
 Data Files
+
 1. relatives.csv
-Details of relatives, including their names, districts, and geographical coordinates.
+Contains information about relatives, including names, districts, and coordinates.
 
 Sample:
 
 csv
-Copy code
 Name,Latitude,Longitude
 Relative_1,37.4979,127.0276
 Relative_2,37.4833,127.0322
-...
+
 2. transport_modes.json
-Defines the transport modes with their respective speeds, costs, and transfer times.
+Defines transport modes with speed, cost per kilometer, and transfer times.
 
 Sample:
 
 json
-Copy code
+
 [
     {"mode": "Walking", "speed_kmh": 5, "cost_per_km": 0, "transfer_time_min": 0},
     {"mode": "Bicycle", "speed_kmh": 15, "cost_per_km": 0, "transfer_time_min": 1},
@@ -125,21 +149,31 @@ Copy code
 ]
 Key Functions
 1. generate_random_start()
-Generates a random starting point within a 5 km radius of one relative.
+Generates a random starting location within 5 km of one of the relatives.
 
 2. build_graph()
-Constructs the graph using the relatives and transport modes. Optimizes for:
+Constructs a graph with nodes representing relatives and edges weighted by time, cost, or distance.
 
-Time
-Cost
-Distance
 3. find_optimized_route()
-Calculates the shortest path using Dijkstra's algorithm.
+Calculates the optimal path to a single destination using Dijkstra's algorithm.
 
-4. visualize_graph()
-Displays the graph with the optimal path highlighted.
+4. find_shortest_path_to_all_relatives()
+Uses Dijkstra's algorithm to calculate the shortest path to visit all relatives.
 
-Limitations
-Assumes data integrity for relatives.csv and transport_modes.json.
-The heuristic for mode selection may not perfectly align with real-world scenarios.
-Random starting point generation assumes uniform distribution.
+5. visualize_graph()
+Displays a graphical representation of the graph, highlighting the optimal route.
+
+6. display_route_table()
+Prints a step-by-step table showing metrics (distance, time, cost) and transport modes.
+
+Performance Logging
+The program logs:
+
+Route Calculation Time:
+Logs the time taken to compute the optimal path.
+Overall Execution Time:
+Logs the total runtime of the application.
+Example log:
+
+[LOG] Time taken to calculate the route: 1.23 seconds
+[LOG] Function 'find_shortest_path_to_all_relatives' executed in 2.45 seconds.

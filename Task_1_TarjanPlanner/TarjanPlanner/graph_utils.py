@@ -1,3 +1,4 @@
+import time
 import networkx as nx
 from geopy.distance import geodesic
 import matplotlib.pyplot as plt
@@ -87,20 +88,25 @@ def build_graph(relatives, transport_modes, criterion="time"):
 
 
 def find_optimized_route(graph, start, end, criterion):
-    """Find the shortest path based on the given criterion using Dijkstra's algorithm."""
+    """Find the shortest path based on the given criterion."""
     print(f"Finding route with criterion: {criterion}")
     if start not in graph:
         raise ValueError(f"Start node '{start}' is not in the graph.")
     if end not in graph:
         raise ValueError(f"End node '{end}' is not in the graph.")
     
-    # Dijkstra's algorithm
-    path = nx.shortest_path(graph, source=start, target=end, weight="weight")
-    total_time = sum(graph[path[i]][path[i + 1]]["time"] for i in range(len(path) - 1))
-    total_cost = sum(graph[path[i]][path[i + 1]]["cost"] for i in range(len(path) - 1))
-    total_distance = sum(graph[path[i]][path[i + 1]]["distance"] for i in range(len(path) - 1))
-
-    return path, total_cost, total_time, total_distance
+    if criterion == "time":
+        path = nx.shortest_path(graph, source=start, target=end, weight="weight")
+        total_time = sum(graph[path[i]][path[i + 1]]["weight"] for i in range(len(path) - 1))
+        total_cost = sum(graph[path[i]][path[i + 1]]["cost"] for i in range(len(path) - 1))
+    elif criterion == "cost":
+        path = nx.shortest_path(graph, source=start, target=end, weight="cost")
+        total_time = sum(graph[path[i]][path[i + 1]]["weight"] for i in range(len(path) - 1))
+        total_cost = sum(graph[path[i]][path[i + 1]]["cost"] for i in range(len(path) - 1))
+    else:
+        raise ValueError("Invalid criterion. Choose 'time' or 'cost'.")
+    
+    return path, total_cost, total_time
 
 
 import matplotlib.pyplot as plt
@@ -191,6 +197,9 @@ def find_shortest_path_to_all_relatives(graph, start, criterion="time"):
     nodes.remove(start)
     print(f"Remaining nodes to visit: {nodes}")
 
+    # Start timing
+    start_time = time.time()
+
     shortest_path = None
     shortest_metric = float("inf")
 
@@ -205,7 +214,11 @@ def find_shortest_path_to_all_relatives(graph, start, criterion="time"):
 
         if total_metric < shortest_metric:
             shortest_metric = total_metric
-            shortest_path = tuple(path)  # Convert to tuple to ensure immutability
+            shortest_path = path
 
-    print(f"Shortest path: {shortest_path}, Metric: {shortest_metric}")
+    # End timing
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"\n[LOG] Time taken to calculate the route: {elapsed_time:.2f} seconds")
+
     return shortest_path, shortest_metric
