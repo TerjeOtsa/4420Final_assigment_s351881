@@ -1,3 +1,5 @@
+import itertools
+import networkx as nx
 import time
 import networkx as nx
 from geopy.distance import geodesic
@@ -183,8 +185,7 @@ def visualize_graph(graph, path=None):
 
 
 
-import itertools
-import networkx as nx
+
 
 
 def find_shortest_path_to_all_relatives(graph, start, criterion="time"):

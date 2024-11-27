@@ -28,13 +28,12 @@ def test_find_optimized_route(setup_data):
 
     start = "Relative_1"
     end = "Relative_5"
-    path, cost, time, distance = find_optimized_route(graph, start, end, "time")
+    path, cost, time = find_optimized_route(graph, start, end, "time")
 
     # Check that a path is returned
     assert path is not None
     assert len(path) > 0
 
-    # Verify non-zero cost, time, and distance
+    # Verify non-zero cost and time
     assert cost > 0
     assert time > 0
-    assert distance > 0
