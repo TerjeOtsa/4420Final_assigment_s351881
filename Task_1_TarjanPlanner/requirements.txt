@@ -1,0 +1,6 @@
+geopy==2.2.0
+networkx==3.0
+matplotlib==3.7.2
+pytest==7.4.0
+prettytable
+colorama
