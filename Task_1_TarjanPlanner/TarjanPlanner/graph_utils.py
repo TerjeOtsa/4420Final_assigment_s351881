@@ -1,37 +1,11 @@
 import itertools
 import networkx as nx
 import time
-import networkx as nx
 from geopy.distance import geodesic
 import matplotlib.pyplot as plt
 import itertools
-import random
-
-def generate_random_start(relatives, max_distance=5):
-    """Generate a random starting location within a given distance from at least one relative."""
-    # Select a random relative as the anchor point
-    anchor = random.choice(relatives)
-    lat, lon = anchor["coords"]
-
-    while True:
-        delta_lat = random.uniform(-0.05, 0.05)  # Approx. 5 km latitude range
-        delta_lon = random.uniform(-0.05, 0.05)  # Approx. 5 km longitude range
-        random_point = (lat + delta_lat, lon + delta_lon)
-
-        # Check if the random point is within the max_distance of at least one relative
-        for relative in relatives:
-            if geodesic(random_point, relative["coords"]).km <= max_distance:
-                return {"name": "Random_Start", "coords": random_point}
-
-
-
-def calculate_distance(coord1, coord2):
-    """Calculate geodesic distance between two coordinates."""
-    return geodesic(coord1, coord2).km
-
-
-import networkx as nx
-from geopy.distance import geodesic
+from TarjanPlanner.io_utils import generate_random_start
+from TarjanPlanner.runtime_utils import log_runtime
 
 
 def calculate_distance(coord1, coord2):
@@ -71,7 +45,7 @@ def normalize_positions(positions):
     }
     return normalized_positions
 
-
+@log_runtime
 def build_graph(relatives, transport_modes, criterion="time"):
     """Build a graph from relatives and transport modes, optimizing for time, cost, or distance."""
     graph = nx.Graph()
@@ -138,11 +112,7 @@ def find_optimized_route(graph, start, end, criterion):
     
     return path, total_cost, total_time
 
-
-import matplotlib.pyplot as plt
-import networkx as nx
-
-
+@log_runtime
 def visualize_graph(graph, path=None, relatives=None):
     """Visualize the graph using Matplotlib with accurate relative positions."""
     if not relatives:
@@ -221,7 +191,7 @@ def visualize_graph(graph, path=None, relatives=None):
 
 
 
-
+@log_runtime
 def find_shortest_path_to_all_relatives(graph, start, criterion="time"):
     """Find the shortest path to visit all relatives based on the given criterion."""
     if start not in graph:
