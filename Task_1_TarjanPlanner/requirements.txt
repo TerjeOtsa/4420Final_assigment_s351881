@@ -2,5 +2,9 @@ geopy==2.2.0
 networkx==3.0
 matplotlib==3.7.2
 pytest==7.4.0
-prettytable
-colorama
+prettytable==3.6.0
+colorama==0.4.6
+tkinter==0.1.0
+numpy==1.26.0
+pandas==2.1.0
+
